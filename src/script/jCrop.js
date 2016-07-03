@@ -112,7 +112,7 @@
             return false;
         }
         function mousemove(evt) {
-            
+
             if (!cropInProgress) return;
             evt.preventDefault();
             cropCoord.left = mouseDown_left < evt.pageX ? mouseDown_left : evt.pageX;
@@ -145,7 +145,7 @@
             if (cropInProgress) {
                 db.css("cursor", dragModeOption.crosshair);
                 return;
-            } 
+            }
             evt.preventDefault();
             if (config.dragEnable) {
 
@@ -387,10 +387,13 @@
          * checkPreDivRatio(config.previewCSS.width,config.previewCSS.height,config.whRatio);
          * 默认长宽与css内保持一致
          */
-        function checkPreDivRatio(width = config.previewCSS.width, height = config.previewCSS.height, ratio = config.whRatio) {
+        function checkPreDivRatio(width, height , ratio) {
             if (!previewId) {
                 return;
             }
+            width = typeof width !== 'undefined' ? width : config.previewCSS.width;
+            height = typeof height !== 'undefined' ? height : config.previewCSS.height;
+            ratio = typeof ratio !== 'undefined' ? ratio : config.whRatio;
             if (ratio instanceof Array) {
                 if (ratio.length == 2) {
                     ratio = (parseFloat(ratio[0]) / (parseFloat(ratio[1]) || 1)) || 1;
