@@ -9,9 +9,9 @@ require_once 'server/image_handle.php';
     <meta charset="UTF-8">
     <title>image handle</title>
     <link rel="stylesheet" href="css/main.css">
-    <script src="../script/jquery.min.js"></script>
+    <script src="../../dist/imagecrop-1.0.0/js/jquery.min.js"></script>
     <script src="../script/jCrop.js"></script>
-    <link rel="stylesheet" href="../less/jCrop.css">
+    <link rel="stylesheet" href="../../dist/imagecrop-1.0.0/css/jCrop.css">
 </head>
 <body>
     <h1>

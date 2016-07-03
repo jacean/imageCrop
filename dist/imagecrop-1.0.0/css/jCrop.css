@@ -1,0 +1,56 @@
+/*！less文件*/
+.default-mask-box {
+  position: absolute;
+  background: green;
+  opacity: .2;
+  filter: alpha(opacity=20);
+  z-index: 5;
+}
+.default-preview-box {
+  float: right;
+  top: 100;
+  width: 200;
+  height: 200;
+  overflow: hidden;
+}
+.default-drag-box {
+  position: absolute;
+  background: #fff;
+  opacity: .5;
+  filter: alpha(opacity=50);
+  z-index: 10;
+  overflow: hidden;
+}
+.dashed-box {
+  border-style: dotted;
+  border-width: 3px;
+  border-color: #333;
+}
+.dashed-top {
+  width: 2000px;
+  height: 0px;
+  border-bottom: 2px #829289 dashed;
+  position: absolute;
+  left: -1400px;
+}
+.dashed-left {
+  width: 0px;
+  height: 2000px;
+  border-left: 2px #829289 dashed;
+  position: absolute;
+  top: -1600px;
+}
+.dashed-bottom {
+  width: 2000px;
+  height: 0px;
+  border-bottom: 2px #829289 dashed;
+  position: absolute;
+  left: -1400px;
+}
+.dashed-right {
+  width: 0px;
+  height: 2000px;
+  border-left: 2px #829289 dashed;
+  position: absolute;
+  top: -1600px;
+}

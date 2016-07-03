@@ -98,7 +98,6 @@
             evt.preventDefault();
             cropInProgress = true;
 
-
             mouseDown_left = evt.pageX;
             mouseDown_top = evt.pageY;
 
@@ -113,46 +112,19 @@
         }
         function mousemove(evt) {
 
-            if (!cropInProgress) return;
-            evt.preventDefault();
-            cropCoord.left = mouseDown_left < evt.pageX ? mouseDown_left : evt.pageX;
-            cropCoord.width = Math.abs(mouseDown_left - evt.pageX);
-            cropCoord.top = mouseDown_top < evt.pageY ? mouseDown_top : evt.pageY;
-            cropCoord.height = Math.abs(mouseDown_top - evt.pageY);
-
-
-            var tempRect = checkCropRatio(cropCoord.width, cropCoord.height, config.whRatio);
-            cropCoord.width = tempRect.w;
-            cropCoord.height = tempRect.h;
-
-            updatedb();
-            if (config.previewEnable) {
-                updatePreview();
-            }
-
-            return false;
-        }
-        function dbmousedown(evt) {
-            evt.preventDefault();
-            dragInProgress = true;
-            dragStart.x = evt.pageX;
-            dragStart.y = evt.pageY;
-
-            return false;
-
-        }
-        function dbmousemove(evt) {
             if (cropInProgress) {
-                db.css("cursor", dragModeOption.crosshair);
-                return;
-            }
-            evt.preventDefault();
-            if (config.dragEnable) {
+                evt.preventDefault();
+                cropCoord.left = mouseDown_left < evt.pageX ? mouseDown_left : evt.pageX;
+                cropCoord.width = Math.abs(mouseDown_left - evt.pageX);
+                cropCoord.top = mouseDown_top < evt.pageY ? mouseDown_top : evt.pageY;
+                cropCoord.height = Math.abs(mouseDown_top - evt.pageY);
 
-                if (!dragInProgress) {
-                    setCorner({ x: evt.pageX, y: evt.pageY }, cropCoord);
-                    return;
-                }
+                var tempRect = checkCropRatio(cropCoord.width, cropCoord.height, config.whRatio);
+                cropCoord.width = tempRect.w;
+                cropCoord.height = tempRect.h;
+                updatedb();
+                updatePreview();
+            } else if (dragInProgress) {
                 switch (dragMode) {
                     case dragModeOption.m:
                         dragCoord.left = cropCoord.left + (evt.pageX - dragStart.x);
@@ -161,93 +133,109 @@
                         dragCoord.height = cropCoord.height;
                         break;
                     case dragModeOption.l:
-                        dragCoord.left = cropCoord.left + (evt.pageX - dragStart.x);
+                        dragCoord.left = evt.pageX > cropCoord.left + cropCoord.width ? cropCoord.left + cropCoord.width : evt.pageX;
                         dragCoord.top = cropCoord.top;
-                        dragCoord.width = cropCoord.width - (evt.pageX - dragStart.x);
+                        dragCoord.width = Math.abs(evt.pageX - (cropCoord.left + cropCoord.width));
                         dragCoord.height = cropCoord.height;
                         break;
                     case dragModeOption.r:
-                        dragCoord.left = cropCoord.left;
+                        dragCoord.left = evt.pageX > cropCoord.left ? cropCoord.left : evt.pageX;
                         dragCoord.top = cropCoord.top;
-                        dragCoord.width = cropCoord.width + (evt.pageX - dragStart.x);
+                        dragCoord.width = Math.abs(evt.pageX - cropCoord.left);
                         dragCoord.height = cropCoord.height;
                         break;
                     case dragModeOption.u:
                         dragCoord.left = cropCoord.left;
-                        dragCoord.top = cropCoord.top + (evt.pageY - dragStart.y);
+                        dragCoord.top = evt.pageY > cropCoord.top + cropCoord.height ? cropCoord.top + cropCoord.height : evt.pageY;
                         dragCoord.width = cropCoord.width;
-                        dragCoord.height = cropCoord.height - (evt.pageY - dragStart.y);
+                        dragCoord.height = Math.abs(evt.pageY - (cropCoord.top + cropCoord.height));
                         break;
                     case dragModeOption.d:
                         dragCoord.left = cropCoord.left;
-                        dragCoord.top = cropCoord.top;
+                        dragCoord.top = evt.pageY > cropCoord.top ? cropCoord.top : evt.pageY;
                         dragCoord.width = cropCoord.width;
-                        dragCoord.height = cropCoord.height + (evt.pageY - dragStart.y);
+                        dragCoord.height = Math.abs(evt.pageY - cropCoord.top);
                         break;
                     case dragModeOption.lu:
-                        dragCoord.left = cropCoord.left + (evt.pageX - dragStart.x);
-                        dragCoord.top = cropCoord.top + (evt.pageY - dragStart.y);
-                        dragCoord.width = cropCoord.width - (evt.pageX - dragStart.x);
-                        dragCoord.height = cropCoord.height - (evt.pageY - dragStart.y);
+                        dragCoord.left = evt.pageX > cropCoord.left + cropCoord.width ? cropCoord.left + cropCoord.width : evt.pageX;
+                        dragCoord.top = evt.pageY > cropCoord.top + cropCoord.height ? cropCoord.top + cropCoord.height : evt.pageY;
+                        dragCoord.width = Math.abs(evt.pageX - (cropCoord.left + cropCoord.width));
+                        dragCoord.height = Math.abs(evt.pageY - (cropCoord.top + cropCoord.height));
                         break;
                     case dragModeOption.ld:
-                        dragCoord.left = cropCoord.left + (evt.pageX - dragStart.x);
-                        dragCoord.top = cropCoord.top;
-                        dragCoord.width = cropCoord.width - (evt.pageX - dragStart.x);
-                        dragCoord.height = cropCoord.height + (evt.pageY - dragStart.y);
+                        dragCoord.left = evt.pageX > cropCoord.left + cropCoord.width ? cropCoord.left + cropCoord.width : evt.pageX;
+                        dragCoord.top = evt.pageY > cropCoord.top ? cropCoord.top : evt.pageY;
+                        dragCoord.width = Math.abs(evt.pageX - (cropCoord.left + cropCoord.width));
+                        dragCoord.height = Math.abs(evt.pageY - cropCoord.top);
                         break;
                     case dragModeOption.ru:
-                        dragCoord.left = cropCoord.left;
-                        dragCoord.top = cropCoord.top + (evt.pageY - dragStart.y);
-                        dragCoord.width = cropCoord.width + (evt.pageX - dragStart.x);
-                        dragCoord.height = cropCoord.height - (evt.pageY - dragStart.y);
+                        dragCoord.left = evt.pageX > cropCoord.left ? cropCoord.left : evt.pageX;
+                        dragCoord.top = evt.pageY > cropCoord.top + cropCoord.height ? cropCoord.top + cropCoord.height : evt.pageY;
+                        dragCoord.width = Math.abs(evt.pageX - cropCoord.left);
+                        dragCoord.height = Math.abs(evt.pageY - (cropCoord.top + cropCoord.height));
                         break;
                     case dragModeOption.rd:
-                        dragCoord.left = cropCoord.left;
-                        dragCoord.top = cropCoord.top;
-                        dragCoord.width = cropCoord.width + (evt.pageX - dragStart.x);
-                        dragCoord.height = cropCoord.height + (evt.pageY - dragStart.y);
+                        dragCoord.left = evt.pageX > cropCoord.left ? cropCoord.left : evt.pageX;
+                        dragCoord.top = evt.pageY > cropCoord.top ? cropCoord.top : evt.pageY;
+                        dragCoord.width = Math.abs(evt.pageX - cropCoord.left);
+                        dragCoord.height = Math.abs(evt.pageY - cropCoord.top);
                         break;
                     default:
                         break;
                 }
                 updatedb();
                 updatePreview();
-            }
 
+            } else {
+                setCorner({ x: evt.pageX, y: evt.pageY }, cropCoord);
+            }
             return false;
         }
-        function mouseup(evt) {
-            cropInProgress = false;
-            if (!db || db.width() == 0 || db.height() == 0) {
-                mask.hide();
-                previewDiv.hide();
-                if (db) { db.remove(); }
-                clearInterval(flowInter);
-                return;
+        function dbmousedown(evt) {
+            evt.preventDefault();
+            if (config.dragEnable) {
+                dragInProgress = true;
+                dragStart.x = evt.pageX;
+                dragStart.y = evt.pageY;
             }
-            var img_pos = dom.offset();
-            coord = {
-                left: db.offset().left - img_pos.left,
-                top: db.offset().top - img_pos.top,
-                width: db.width(),
-                height: db.height()
+            return false;
+        }
+
+        function mouseup(evt) {
+
+            if (cropInProgress) {
+                cropInProgress = false;
+                if (!db || db.width() == 0 || db.height() == 0) {
+                    mask.hide();
+                    previewDiv.hide();
+                    if (db) { db.remove(); }
+                    clearInterval(flowInter);
+                }
             }
             if (dragInProgress) {
                 dragInProgress = false;
+                var img_pos = dom.offset();
+                coord = {
+                    let: db.offset().left - img_pos.left,
+                    top: db.offset().top - img_pos.top,
+                    width: db.width(),
+                    height: db.height()
+                }
                 cropCoord.left = dragCoord.left;
                 cropCoord.top = dragCoord.top;
                 cropCoord.width = dragCoord.width;
                 cropCoord.height = dragCoord.height;
+                setCorner({ x: evt.pageX, y: evt.pageY }, cropCoord);
             }
-            $("body").css("cursor", dragModeOption.default);
+
+            return;
         }
 
         function updatedb() {
             var tempRect, current;
             if (db) db.remove();
             db = $("<div>").appendTo("body").attr("id", "drag_box").addClass("default-drag-box dashed-box").css(config.dragBoxCSS);
-            db.mousemove(dbmousemove);
+            db.mousemove(mousemove);
             db.mousedown(dbmousedown);
 
             if (cropInProgress) {
@@ -387,7 +375,7 @@
          * checkPreDivRatio(config.previewCSS.width,config.previewCSS.height,config.whRatio);
          * 默认长宽与css内保持一致
          */
-        function checkPreDivRatio(width, height , ratio) {
+        function checkPreDivRatio(width, height, ratio) {
             if (!previewId) {
                 return;
             }
@@ -430,43 +418,55 @@
 
 
         function setCorner(point, area) {
+            if (dragInProgress) {
+                return;
+            }
+            if (!db) return;
             var border = 10;
-
             var rect = [
                 area.left,
                 area.top,
                 area.left + area.width,
                 area.top + area.height
             ];
-            dragMode = dragModeOption.m;
-            if (between(point.x, rect[0], rect[0] + border) && between(point.y, rect[1] + border, rect[3] - border)) {
-                dragMode = dragModeOption.l;
+            dragMode = dragModeOption.crosshair;
+            if (between(point.x, rect[0] + border, rect[2] - border) && between(point.y, rect[1] + border, rect[3] - border)) {
+                dragMode = config.dragEnable ? dragModeOption.m : dragModeOption.default;
             }
-            if (between(point.x, rect[2], rect[2] - border) && between(point.y, rect[1] + border, rect[3] - border)) {
-                dragMode = dragModeOption.r;
-            }
-            if (between(point.x, rect[2] - border, rect[0] + border) && between(point.y, rect[1], rect[1] + border)) {
-                dragMode = dragModeOption.u;
-            }
+            if (config.dragEnable) {
+                if (between(point.x, rect[0], rect[0] + border) && between(point.y, rect[1] + border, rect[3] - border)) {
+                    dragMode = dragModeOption.l;
+                }
+                if (between(point.x, rect[2], rect[2] - border) && between(point.y, rect[1] + border, rect[3] - border)) {
+                    dragMode = dragModeOption.r;
+                }
+                if (between(point.x, rect[2] - border, rect[0] + border) && between(point.y, rect[1], rect[1] + border)) {
+                    dragMode = dragModeOption.u;
+                }
 
-            if (between(point.x, rect[2] - border, rect[0] + border) && between(point.y, rect[3], rect[3] - border)) {
-                dragMode = dragModeOption.d;
-            }
+                if (between(point.x, rect[2] - border, rect[0] + border) && between(point.y, rect[3], rect[3] - border)) {
+                    dragMode = dragModeOption.d;
+                }
 
-            if (between(point.x, rect[0], rect[0] + border) && between(point.y, rect[1], rect[1] + border)) {
-                dragMode = dragModeOption.lu;
-            }
-            if (between(point.x, rect[0], rect[0] + border) && between(point.y, rect[3], rect[3] - border)) {
-                dragMode = dragModeOption.ld;
-            }
-            if (between(point.x, rect[2], rect[2] - border) && between(point.y, rect[1], rect[1] + border)) {
-                dragMode = dragModeOption.ru;
-            }
-            if (between(point.x, rect[2], rect[2] - border) && between(point.y, rect[3], rect[3] - border)) {
-                dragMode = dragModeOption.rd;
+                if (between(point.x, rect[0], rect[0] + border) && between(point.y, rect[1], rect[1] + border)) {
+                    dragMode = dragModeOption.lu;
+                }
+                if (between(point.x, rect[0], rect[0] + border) && between(point.y, rect[3], rect[3] - border)) {
+                    dragMode = dragModeOption.ld;
+                }
+                if (between(point.x, rect[2], rect[2] - border) && between(point.y, rect[1], rect[1] + border)) {
+                    dragMode = dragModeOption.ru;
+                }
+                if (between(point.x, rect[2], rect[2] - border) && between(point.y, rect[3], rect[3] - border)) {
+                    dragMode = dragModeOption.rd;
+                }
             }
             db.css("cursor", dragMode);
+            dom.css("cursor", dragMode);
+            mask.css("cursor", dragMode);
         }
+
+
         function between(dest, h, l) {
             return (dest <= h && dest >= l) || (dest <= l && dest >= h);
         }
