@@ -1,0 +1,40 @@
+{
+  "name": "imagecrop",
+  "version": "1.0.0",
+  "description": "image cropping plugin with jQuery by jacean",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/jacean/imageCrop.git"
+  },
+  "keywords": [
+    "image",
+    "crop"
+  ],
+  "author": "jacean",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jacean/imageCrop/issues"
+  },
+  "homepage": "https://github.com/jacean/imageCrop#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-bom": "^1.0.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.0",
+    "gulp-htmlmin": "^2.0.0",
+    "gulp-imagemin": "^3.0.1",
+    "gulp-jshint": "^2.0.1",
+    "gulp-less": "^3.1.0",
+    "gulp-load-plugins": "^1.2.2",
+    "gulp-notify": "^2.2.0",
+    "gulp-uglify": "^1.5.3",
+    "gulp-watch": "^4.3.5",
+    "imagemin-jpeg-recompress": "^5.0.0",
+    "jshint": "^2.9.2",
+    "require-dir": "^0.3.0"
+  }
+}

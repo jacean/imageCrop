@@ -1,0 +1,34 @@
+/*
+
+*/
+#imgform{
+    border: solid 4px #ddd  ;
+    background: #eee  ;
+    padding: 10px;
+    margin: 30px;
+    width: 600px;
+    overflow: hidden;
+}
+#imgform label{
+    float: left;
+    width: 200px;
+    font-weight: bold;
+    color: #666;
+    clear: both;
+    padding-bottom: 10px;
+
+}
+#imgform input{
+    float: left;
+
+}
+#imgform input[type="submit"]{
+    clear: both;
+}
+#img_upload{
+    width: 400px;
+}
+#img_name{
+    width: 200px;
+}
+
