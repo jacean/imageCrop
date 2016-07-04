@@ -54,3 +54,15 @@
   position: absolute;
   top: -1600px;
 }
+.corner-box {
+  width: 7px;
+  height: 7px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  background-color: #829289;
+  position: absolute;
+  z-index: 100;
+  opacity: .5;
+  filter: alpha(opacity=50);
+}

@@ -36,9 +36,11 @@ require_once 'server/image_handle.php';
     <?php
         }else {
     ?>
+    <div style="padding:10px;">
     <img id="uploaded_image"  alt="" />
-   
     <div id="preview_image" ></div>
+   </div>
+    
         <script>
         var image='<?php echo $_SESSION['newPath']."?".rand(0,10000); ?>';
         jCrop.init("uploaded_image",image);
@@ -63,6 +65,7 @@ require_once 'server/image_handle.php';
             jCrop.config.whRatio=$('#ratio').val().split(',');
         }
     </script>   
+    <div>
     <button onclick="jCrop.config.flowEnable=toggle(jCrop.config.flowEnable)">flow</button>
     <button onclick="jCrop.config.maskEnable=toggle(jCrop.config.maskEnable)">mask</button>
     <button onclick="jCrop.config.dragEnable=toggle(jCrop.config.dragEnable)">drag</button>
@@ -72,9 +75,11 @@ require_once 'server/image_handle.php';
     <button onclick="jCrop.refresh()">refresh</button>
     <button onclick="crop();">confirm crop</button>
     <button onclick="cancel();">cancel crop</button>
+    </div>
     <p>
     <a href="index.php?new=true">start over with new image</a>
     </p>
+    
     <?php } ?>
 
 

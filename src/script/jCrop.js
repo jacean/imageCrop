@@ -67,13 +67,12 @@
                 initPreview(previewId);
                 previewDiv.hide();
             }
-            dom.mousedown(mousedown);
-            dom.mousemove(mousemove);
             mask = $("<div>").appendTo("body").attr("id", "mask_box").addClass("default-mask-box").css(config.maskCSS);//先执行默认的必须格式，然后再被自定义的覆盖，保证基础运行
-            mask.mousedown(mousedown);
-            mask.mousemove(mousemove);
             mask.css("cursor", dragModeOption.crosshair);
             dom.css("cursor", dragModeOption.crosshair);
+            dom.mousedown(mousedown);
+            mask.mousedown(mousedown);
+            $(window).mousemove(mousemove);
             $(window).mouseup(mouseup);
         }
         function mousedown(evt) {
@@ -106,14 +105,11 @@
             cropCoord.top = mouseDown_top;
             cropCoord.height = 0;
 
-
-
             return false;
         }
         function mousemove(evt) {
 
             if (cropInProgress) {
-                evt.preventDefault();
                 cropCoord.left = mouseDown_left < evt.pageX ? mouseDown_left : evt.pageX;
                 cropCoord.width = Math.abs(mouseDown_left - evt.pageX);
                 cropCoord.top = mouseDown_top < evt.pageY ? mouseDown_top : evt.pageY;
@@ -122,8 +118,10 @@
                 var tempRect = checkCropRatio(cropCoord.width, cropCoord.height, config.whRatio);
                 cropCoord.width = tempRect.w;
                 cropCoord.height = tempRect.h;
+                checkArea(cropCoord);
                 updatedb();
                 updatePreview();
+
             } else if (dragInProgress) {
                 switch (dragMode) {
                     case dragModeOption.m:
@@ -183,13 +181,52 @@
                     default:
                         break;
                 }
+                checkArea(dragCoord);
                 updatedb();
                 updatePreview();
 
             } else {
                 setCorner({ x: evt.pageX, y: evt.pageY }, cropCoord);
             }
-            return false;
+        }
+
+        /**
+         * 边界检查，当选区超出图形则停止变化
+         */
+        function checkArea(area) {
+            var domRect = {
+                left: dom.position().left,
+                top: dom.position().top,
+                width: dom.width(),
+                height: dom.height()
+            }
+
+            if (area.left > domRect.left) {
+
+                if (area.left + area.width > domRect.left + domRect.width) {
+                    area.width = domRect.left + domRect.width - area.left;
+                }
+                if (area.left > domRect.left + domRect.width) {
+                    area.left = domRect.left + domRect.width;
+                    area.width = 0;
+                }
+            } else {
+                area.width = area.width - (domRect.left - area.left);
+                area.left = domRect.left;
+            }
+            if (area.top > domRect.top) {
+                if (area.top + area.height > domRect.top + domRect.height) {
+                    area.height = domRect.top + domRect.height - area.top;
+                }
+                if (area.top > domRect.top + domRect.height) {
+                    area.top = domRect.top + domRect.height;
+                    area.height = 0;
+                }
+            } else {
+                area.height = area.height - (domRect.top - area.top);
+                area.top = domRect.top;
+
+            }
         }
         function dbmousedown(evt) {
             evt.preventDefault();
@@ -208,7 +245,7 @@
                 if (!db || db.width() == 0 || db.height() == 0) {
                     mask.hide();
                     previewDiv.hide();
-                    if (db) { db.remove(); }
+                    if (db) { db.remove();db=null; }
                     clearInterval(flowInter);
                 }
             }
@@ -216,7 +253,7 @@
                 dragInProgress = false;
                 var img_pos = dom.offset();
                 coord = {
-                    let: db.offset().left - img_pos.left,
+                    left: db.offset().left - img_pos.left,
                     top: db.offset().top - img_pos.top,
                     width: db.width(),
                     height: db.height()
@@ -227,7 +264,7 @@
                 cropCoord.height = dragCoord.height;
                 setCorner({ x: evt.pageX, y: evt.pageY }, cropCoord);
             }
-
+            setFlowBox(db);
             return;
         }
 
@@ -294,7 +331,34 @@
             }
         }
 
+        function addCornerBox(left, top) {
+            $("<div>").appendTo("body").addClass("corner-box").css({
+                //减去cornerbox的边线宽度，再加上实际调整  
+                left: left - 2,
+                top: top - 1
+            });
+        }
         function setFlowBox(db) {
+
+            $(".corner-box").remove();
+            if (!db) { return; }
+            if (config.dragEnable) {
+                /**
+                 * 1---2---3
+                 * |   |   |
+                 * 4---+---5
+                 * |   |   |
+                 * 6---7---8
+                 */
+                addCornerBox(db.position().left - config.border / 2, db.position().top - config.border / 2);
+                addCornerBox(db.position().left + db.width() / 2 - config.border / 2, db.position().top - config.border / 2);
+                addCornerBox(db.position().left + db.width() - config.border / 2, db.position().top - config.border / 2);
+                addCornerBox(db.position().left - config.border / 2, db.position().top + db.height() / 2 - config.border / 2);
+                addCornerBox(db.position().left + db.width() - config.border / 2, db.position().top + db.height() / 2 - config.border / 2);
+                addCornerBox(db.position().left - config.border / 2, db.position().top + db.height() - config.border);
+                addCornerBox(db.position().left + db.width() / 2 - config.border / 2, db.position().top + db.height() - config.border);
+                addCornerBox(db.position().left + db.width() - config.border / 2, db.position().top + db.height() - config.border);
+            }
             if (!config.flowEnable) {
                 clearInterval(flowInter);
                 db.addClass("dashed-box");
@@ -306,8 +370,8 @@
             } else {
                 if (db.hasClass("dashed-box")) {
                     db.removeClass("dashed-box");
-                    $("<div>").appendTo(db).addClass("dashed-top");
-                    $("<div>").appendTo(db).addClass("dashed-left");
+                    $("<div>").appendTo(db).addClass("dashed-top").css("top", 0);
+                    $("<div>").appendTo(db).addClass("dashed-left").css("left", 0);
                     $("<div>").appendTo(db).addClass("dashed-bottom").css("top", db.height() - 2);
                     $("<div>").appendTo(db).addClass("dashed-right").css("left", db.width() - 2);
                     clearInterval(flowInter);
@@ -422,7 +486,7 @@
                 return;
             }
             if (!db) return;
-            var border = 10;
+            var border = config.border;
             var rect = [
                 area.left,
                 area.top,
@@ -508,7 +572,8 @@
             },
             fixRatio: false,
             whRatio: [2, 1],
-            flowEnable: true
+            flowEnable: true,
+            border: 5
         };
 
         return {
