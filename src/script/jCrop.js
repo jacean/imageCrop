@@ -1,9 +1,22 @@
-
-(function (root) {
+;
+$.extend({
+    log: function (message) {
+        var now = new Date(),
+            y = now.getFullYear(),
+            m = now.getMonth() + 1, //！JavaScript中月分是从0开始的
+            d = now.getDate(),
+            h = now.getHours(),
+            min = now.getMinutes(),
+            s = now.getSeconds(),
+            time = y + '/' + m + '/' + d + ' ' + h + ':' + min + ':' + s;
+        console.log(time + ' My App: ' + message);
+    }
+});
+(function (root, $, undefined) {
     //this是document
-    root.jCrop = function () {
-        var dom;
-        var db, mask, flowInter;
+    root.jCrop = function (customConfig) {
+        var $dom;
+        var $db, $mask, flowInter;
         var previewImg, previewId = null, previewDiv;
         var cropInProgress = false, dragInProgress = false;
         var coord = {
@@ -52,46 +65,46 @@
 
         /**
          * 选区逻辑:
-         * 1、在dom上按下鼠标，mask遮罩出现，drag_box出现
+         * 1、在$dom上按下鼠标，mask遮罩出现，drag_box出现
          * 2、鼠标在mask上移动，drag_box跟随变化
          * 3、鼠标弹起，判断drag_box的大小，为0则取消drag_box和mask
          * 4、在mask上重新选取，以在mask上按下鼠标开始
          * 5、重复以上
          */
         function init(elementId, image, pId) {
-            dom = $("#" + elementId);
-            dom.attr("src", image);
+            $dom = $("#" + elementId);
+            $dom.attr("src", image);
             if (pId != undefined) {
                 previewId = pId;
                 config.previewEnable = true;
                 initPreview(previewId);
                 previewDiv.hide();
             }
-            mask = $("<div>").appendTo("body").attr("id", "mask_box").addClass("default-mask-box").css(config.maskCSS);//先执行默认的必须格式，然后再被自定义的覆盖，保证基础运行
-            mask.css("cursor", dragModeOption.crosshair);
-            dom.css("cursor", dragModeOption.crosshair);
-            dom.mousedown(mousedown);
-            mask.mousedown(mousedown);
+            $mask = $("<div>").appendTo("body").attr("id", "mask_box").addClass("default-mask-box").css(config.maskCSS);//先执行默认的必须格式，然后再被自定义的覆盖，保证基础运行
+            $mask.css("cursor", dragModeOption.crosshair);
+            $dom.css("cursor", dragModeOption.crosshair);
+            $dom.mousedown(mousedown);
+            $mask.mousedown(mousedown);
             $(window).mousemove(mousemove);
             $(window).mouseup(mouseup);
         }
         function mousedown(evt) {
             if (config.maskEnable) {
-                mask.css({
-                    left: dom.position().left,
-                    top: dom.position().top,
-                    width: dom.width(),
-                    height: dom.height()
+                $mask.css({
+                    left: $dom.position().left,
+                    top: $dom.position().top,
+                    width: $dom.width(),
+                    height: $dom.height()
                 }).css("zIndex", 5);
-                mask.show();
+                $mask.show();
             } else {
-                mask.hide();
+                $mask.hide();
             }
             if (previewDiv != undefined) previewDiv.hide();
             if (config.previewEnable) {
                 previewDiv.show();
             } else { previewDiv.hide(); }
-            if (db != undefined) { db.remove(); db = null; }
+            if ($db != undefined) { $db.remove(); $db = null; }
 
             cropInProgress = true;
             evt.preventDefault();
@@ -186,7 +199,23 @@
                 updatePreview();
 
             } else {
-                setCorner({ x: evt.pageX, y: evt.pageY }, cropCoord);
+                setCornerCursor({ x: evt.pageX, y: evt.pageY }, cropCoord);
+            }
+            if ($db) {
+                var img_pos = $dom.offset();
+                coord = {
+                    left: $db.offset().left - img_pos.left,
+                    top: $db.offset().top - img_pos.top,
+                    width: $db.width(),
+                    height: $db.height()
+                }
+            } else {
+                coord = {
+                    left: 0,
+                    top: 0,
+                    width: 0,
+                    height: 0
+                }
             }
         }
 
@@ -195,10 +224,10 @@
          */
         function checkArea(area) {
             var domRect = {
-                left: dom.position().left,
-                top: dom.position().top,
-                width: dom.width(),
-                height: dom.height()
+                left: $dom.position().left,
+                top: $dom.position().top,
+                width: $dom.width(),
+                height: $dom.height()
             }
 
             if (area.left > domRect.left) {
@@ -242,38 +271,32 @@
 
             if (cropInProgress) {
                 cropInProgress = false;
-                if (!db || db.width() == 0 || db.height() == 0) {
-                    mask.hide();
+                if (!$db || $db.width() == 0 || $db.height() == 0) {
+                    $mask.hide();
                     previewDiv.hide();
-                    if (db) { db.remove();db=null; }
+                    if ($db) { $db.remove(); $db = null; }
                     clearInterval(flowInter);
                 }
             }
             if (dragInProgress) {
                 dragInProgress = false;
-                var img_pos = dom.offset();
-                coord = {
-                    left: db.offset().left - img_pos.left,
-                    top: db.offset().top - img_pos.top,
-                    width: db.width(),
-                    height: db.height()
-                }
                 cropCoord.left = dragCoord.left;
                 cropCoord.top = dragCoord.top;
                 cropCoord.width = dragCoord.width;
                 cropCoord.height = dragCoord.height;
-                setCorner({ x: evt.pageX, y: evt.pageY }, cropCoord);
+                setCornerCursor({ x: evt.pageX, y: evt.pageY }, cropCoord);
             }
-            setFlowBox(db);
+            setCornerBox($db);
+
             return;
         }
 
         function updatedb() {
             var tempRect, current;
-            if (db) db.remove();
-            db = $("<div>").appendTo("body").attr("id", "drag_box").addClass("default-drag-box dashed-box").css(config.dragBoxCSS);
-            db.mousemove(mousemove);
-            db.mousedown(dbmousedown);
+            if ($db) $db.remove();
+            $db = $("<div>").appendTo("body").attr("id", "drag_box").addClass("default-drag-box dashed-box").css(config.dragBoxCSS);
+            $db.mousemove(mousemove);
+            $db.mousedown(dbmousedown);
 
             if (cropInProgress) {
                 tempRect = checkCropRatio(cropCoord.width, cropCoord.height, config.whRatio);
@@ -288,13 +311,13 @@
                 current = dragCoord;
             }
 
-            db.css({
+            $db.css({
                 left: current.left,
                 top: current.top,
                 width: current.width,
                 height: current.height
             }).css("zIndex", 10);      //添加后返回的是数组
-            setFlowBox(db);
+            setCornerBox($db);
 
         }
         /**
@@ -314,12 +337,12 @@
                     }
 
                 }
-                var imgPreWidth = dom.width() / zoom;
-                var imgPreHeight = dom.height() / zoom;
-                var imgX = dom.position().left;
-                var imgY = dom.position().top;
-                var boxX = db.position().left;
-                var boxY = db.position().top;
+                var imgPreWidth = $dom.width() / zoom;
+                var imgPreHeight = $dom.height() / zoom;
+                var imgX = $dom.position().left;
+                var imgY = $dom.position().top;
+                var boxX = $db.position().left;
+                var boxY = $db.position().top;
                 var offsetX = (imgX - boxX) / zoom;
                 var offsetY = (imgY - boxY) / zoom;
                 previewImg.css({
@@ -338,7 +361,7 @@
                 top: top - 1
             });
         }
-        function setFlowBox(db) {
+        function setCornerBox(db) {
 
             $(".corner-box").remove();
             if (!db) { return; }
@@ -481,11 +504,11 @@
         }
 
 
-        function setCorner(point, area) {
+        function setCornerCursor(point, area) {
             if (dragInProgress) {
                 return;
             }
-            if (!db) return;
+            if (!$db) return;
             var border = config.border;
             var rect = [
                 area.left,
@@ -525,9 +548,9 @@
                     dragMode = dragModeOption.rd;
                 }
             }
-            db.css("cursor", dragMode);
-            dom.css("cursor", dragMode);
-            mask.css("cursor", dragMode);
+            $db.css("cursor", dragMode);
+            $dom.css("cursor", dragMode);
+            $mask.css("cursor", dragMode);
         }
 
 
@@ -546,10 +569,10 @@
             updateConfig();
         }
         function destroy() {
-            db.remove();
-            mask.remove();
-            db = null;
-            mask = null;
+            $db.remove();
+            $mask.remove();
+            $db = null;
+            $mask = null;
         }
 
         function crop() {
@@ -560,7 +583,12 @@
             destroy();
         }
 
-        var config = {
+        var api = {
+            onMove: function () { },
+            onResize: function () { }
+
+        };
+        var defaultConfig = {
             dragBoxCSS: {},
             maskEnable: true,
             maskCSS: {},
@@ -573,8 +601,11 @@
             fixRatio: false,
             whRatio: [2, 1],
             flowEnable: true,
-            border: 5
+            border: 5,
+            api: {}
         };
+        var config = $.extend({}, defaultConfig, customConfig);
+
 
         return {
             init: init,
@@ -591,4 +622,4 @@
 
     //旋转功能
 
-})(this);
+})(this, jQuery);

@@ -64,8 +64,14 @@ require_once 'server/image_handle.php';
         function setRatio(){
             jCrop.config.whRatio=$('#ratio').val().split(',');
         }
+        (function getRect(){
+            setInterval(function(){
+                $("#crop_rect").text(JSON.stringify(jCrop.crop()));
+            },1000);
+        })();
     </script>   
     <div>
+    <p id="crop_rect"></p>
     <button onclick="jCrop.config.flowEnable=toggle(jCrop.config.flowEnable)">flow</button>
     <button onclick="jCrop.config.maskEnable=toggle(jCrop.config.maskEnable)">mask</button>
     <button onclick="jCrop.config.dragEnable=toggle(jCrop.config.dragEnable)">drag</button>
