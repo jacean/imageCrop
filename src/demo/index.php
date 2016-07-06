@@ -37,18 +37,21 @@ require_once 'server/image_handle.php';
         }else {
     ?>
     <div style="padding:10px;">
-    <img id="uploaded_image"  alt="" />
+    <div id="uploaded_image" class="imgCrop"  ></div>
+    <div id="subImage"  class="imgCrop"/></div>
+        <div id="subImage1"  class="imgCrop"/></div>
     <div id="preview_image" ></div>
    </div>
     
         <script>
         var image='<?php echo $_SESSION['newPath']."?".rand(0,10000); ?>';
-        jCrop.init("uploaded_image",image);
-        jCrop.config.maskEnable=true;
-        jCrop.config.previewEnable=false;
-        jCrop.initPreview("preview_image");
-        // jCrop.config.fixRatio=true;
-        jCrop.setPreDivRect(500,100);
+        $(".imgCrop").jCrop(image);
+        // jCrop.init("uploaded_image",image);
+        // jCrop.config.maskEnable=true;
+        // jCrop.config.previewEnable=false;
+        // jCrop.initPreview("preview_image");
+        // // jCrop.config.fixRatio=true;
+        // jCrop.setPreDivRect(500,100);
         function crop(){
             var coord=jCrop.crop();
             location.href = "index.php?crop_attempt=true&crop_l=" + coord.left + "&crop_t=" + coord.top + "&crop_w=" + coord.width + "&crop_h=" + coord.height;
@@ -64,11 +67,11 @@ require_once 'server/image_handle.php';
         function setRatio(){
             jCrop.config.whRatio=$('#ratio').val().split(',');
         }
-        (function getRect(){
-            setInterval(function(){
-                $("#crop_rect").text(JSON.stringify(jCrop.crop()));
-            },1000);
-        })();
+        // (function getRect(){
+        //     setInterval(function(){
+        //         $("#crop_rect").text(JSON.stringify(jCrop.crop()));
+        //     },1000);
+        // })();
     </script>   
     <div>
     <p id="crop_rect"></p>
@@ -79,8 +82,12 @@ require_once 'server/image_handle.php';
     <input id="ratio" type="text" /> <button onclick="setRatio()">setratio</button>
     <button onclick="jCrop.config.previewEnable=toggle(jCrop.config.previewEnable)">previewToggle</button>
     <button onclick="jCrop.refresh()">refresh</button>
-    <button onclick="crop();">confirm crop</button>
+    <button id="butCancel" onclick="crop();">confirm crop</button>
     <button onclick="cancel();">cancel crop</button>
+    <div id="aaa">
+    <button onclick='$("#aaa").remove("#dd")'>click</button>
+    <button id="dd">aa</button>
+    </div>
     </div>
     <p>
     <a href="index.php?new=true">start over with new image</a>

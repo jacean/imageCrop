@@ -1,0 +1,1 @@
+function assertElement(e){try{if(e.cloneNode(!0),1!=e.nodeType&&9!=e.nodeType)return!1}catch(t){throw new Error("ele参数不合法")}return!1}$.extend({log:function(e){var t=new Date,n=t.getFullYear(),o=t.getMonth()+1,r=t.getDate(),g=t.getHours(),l=t.getMinutes(),c=t.getSeconds(),u=n+"/"+o+"/"+r+" "+g+":"+l+":"+c;console.log(u+" My App: "+e)}});
