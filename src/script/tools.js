@@ -26,3 +26,13 @@ function assertElement(ele) {
     }
     return false;
 }
+function inArray(t, arr) {
+    for (var i = 0, k = arr.length; i < k; i++) {
+        var x = arr[i];
+        if (t.is(arr[i])) {
+            return true;
+        }
+    }
+    // 如果不在数组中就会返回false 
+    return false;
+}
